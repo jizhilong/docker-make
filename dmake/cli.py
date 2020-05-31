@@ -49,13 +49,13 @@ def _main():
         builds_order, builds_dict = utils.get_sorted_build_dicts_from_yaml(
             args.dmakefile)
     except ConfigurationError as e:
-        LOG.error("failed to parse %s: %s", args.dmakefile, e.message)
+        LOG.error("failed to parse %s: %s", args.dmakefile, e)
         return 1
     except ValidateError as e:
-        LOG.error("wrong configuration: %s", e.message)
+        LOG.error("wrong configuration: %s", e)
         return 1
     except DmakeError as e:
-        LOG.error(e.message)
+        LOG.error(e)
         return 1
 
     builds = {}
@@ -91,7 +91,7 @@ def _main():
             build.build()
             build.tag()
         except BuildFailed as e:
-            LOG.error("failed to build %s: %s", build.name, e.message)
+            LOG.error("failed to build %s: %s", build.name, e)
             return 1
         except Exception:
             LOG.exception("failed to build %s", build.name)
@@ -101,7 +101,7 @@ def _main():
             try:
                 build.push()
             except PushFailed as e:
-                LOG.error("failed to push %s: %s", build.name, e.message)
+                LOG.error("failed to push %s: %s", build.name, e)
                 return 1
             except Exception:
                 LOG.exception("failed to push %s", build.name)

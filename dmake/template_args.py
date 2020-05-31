@@ -46,9 +46,11 @@ class ExternalCmdGenerator(TemplateArgsGenerator):
                                             stderr=subprocess.STDOUT,
                                             shell=not isinstance(self.cmd,
                                                                  list))
+            if isinstance(value, bytes):
+                value = value.decode('utf-8')
             value = value.strip()
             if value:
-                yield self.key, value.strip()
+                yield self.key, value
         except subprocess.CalledProcessError as e:
             log_level = logging.WARNING
 

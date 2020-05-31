@@ -65,7 +65,7 @@ def validate(config):
     if not isinstance(builds, dict):
         raise ValidateError("builds should be a dict")
 
-    for name, build in builds.iteritems():
+    for name, build in builds.items():
         for dep in build.get('depends_on', []):
             if dep not in builds:
                 raise ValidateError("%s depends on %s, which is not present in"
@@ -75,7 +75,7 @@ def validate(config):
 
 def sort_builds_dict(builds):
     # Topological sort (Cormen/Tarjan algorithm)
-    unmarked = builds.keys()
+    unmarked = list(builds.keys())
     temporary_marked = set()
     sorted_builds = []
 
@@ -89,7 +89,7 @@ def sort_builds_dict(builds):
 
         if n in unmarked:
             temporary_marked.add(n)
-            builds_dep_on_n = [name for name, build in builds.iteritems()
+            builds_dep_on_n = [name for name, build in builds.items()
                                if
                                n in build.get('depends_on', [])]
             for m in builds_dep_on_n:
