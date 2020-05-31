@@ -55,12 +55,12 @@ def _main():
         LOG.error("wrong configuration: %s", e.message)
         return 1
     except DmakeError as e:
-        LOG.eror(e.message)
+        LOG.error(e.message)
         return 1
 
     builds = {}
     for name in builds_order:
-        if (args.remove):
+        if args.remove:
             builds_dict[name]['remove_intermediate'] = args.remove
         builds[name] = dmake.build.Build(name=name, **builds_dict[name])
 
@@ -103,7 +103,7 @@ def _main():
             except PushFailed as e:
                 LOG.error("failed to push %s: %s", build.name, e.message)
                 return 1
-            except Exception as e:
+            except Exception:
                 LOG.exception("failed to push %s", build.name)
                 return 1
 

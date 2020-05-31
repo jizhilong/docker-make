@@ -43,7 +43,7 @@ class TemplateArgsGeneratorTests(unittest2.TestCase):
                          '_master')
         self.assertEqual(template_args.correct_tag_name('.test'),
                          '_test')
-        long_tag_name = ''.join(str(i) for i in xrange(128))
+        long_tag_name = ''.join(str(i) for i in range(128))
         self.assertEqual(len(template_args.correct_tag_name(long_tag_name)),
                          128)
 

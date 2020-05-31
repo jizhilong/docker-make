@@ -1,23 +1,20 @@
+import json
+import logging
 import os
 import tempfile
-import logging
 
-import json
-from docker import utils as docker_utils
-
-from dmake import utils
 from dmake import template_args
+from dmake import utils
 from dmake.errors import *  # noqa
-
 
 LOG = logging.getLogger(__name__)
 
 
 class Build(object):
     def __init__(self, name, context, dockerfile,
-                 buildargs=None, dockerignore=None, labels=None, depends_on=None,
-                 extract=None, pushes=None, rewrite_from=None,
-                 remove_intermediate=None):
+                 buildargs=None, dockerignore=None, labels=None,
+                 depends_on=None, extract=None, pushes=None,
+                 rewrite_from=None, remove_intermediate=None):
         self.name = name
         self.context = os.path.join(os.getcwd(), context.lstrip('/'))
         self.dockerfile = dockerfile
@@ -82,7 +79,7 @@ class Build(object):
         command = ["docker", "build", "-f", self.dockerfile]
         for label in self.labels:
             command.extend(["--label", label])
-        print ("%s: %s" % (self.name, " ".join(command)))
+        print("%s: %s" % (self.name, " ".join(command)))
 
     def build(self):
         self._update_progress("building")
@@ -110,9 +107,7 @@ class Build(object):
 
             try:
                 tag_name = tag_template.format(**template_kwargs)
-                kwargs = {}
-                if docker_utils.compare_version('1.22', self.docker._version) < 0:
-                    kwargs['force'] = True
+                kwargs = {'force': True}
                 self.docker.tag(self.final_image, repo, tag_name, **kwargs)
                 self._update_progress("tag added: %s:%s" % (repo, tag_name))
             except KeyError as e:
@@ -129,7 +124,8 @@ class Build(object):
             try:
                 tag_name = tag_template.format(**template_kwargs)
             except KeyError:
-                raise PushFailed("can not get tag name for tag_template: %s" % tag_template)
+                raise PushFailed("can not get tag name for tag_template: %s"
+                                 % tag_template)
 
             self._update_progress("pushing to %s:%s" % (repo, tag_name))
             self._do_push(repo, tag_name)
@@ -137,11 +133,12 @@ class Build(object):
 
     def need_push(self, push_mode):
         tag_template_args = template_args.tag_template_args()
+        branch_name = tag_template_args.get('git_branch', '9x43d83')
         return {
             'always': True,
             'never': False,
             'on_tag': tag_template_args.get('git_tag', False),
-            'on_branch:{0}'.format(tag_template_args.get('git_branch', '9x43d83')): True
+            'on_branch:{0}'.format(branch_name): True
         }.get(push_mode, False)
 
     def _update_progress(self, progress):
@@ -184,12 +181,14 @@ class Build(object):
                         f.write("FROM %s\n" % self.rewrite_from)
                     else:
                         from_text, intermediate_name = line.split(" AS ")
-                        f.write("FROM %s AS %s\n" % (self.rewrite_from, intermediate_name))
-
+                        f.write("FROM %s AS %s\n"
+                                % (self.rewrite_from, intermediate_name))
 
         buildargs = {}
         if self.buildargs:
-            buildargs = {k: os.path.expandvars(v) for k, v in [arg.split('=') for arg in self.buildargs]}
+            buildargs = {k: os.path.expandvars(v)
+                         for k, v
+                         in [arg.split('=') for arg in self.buildargs]}
 
         params = {
             'path': self.context,
